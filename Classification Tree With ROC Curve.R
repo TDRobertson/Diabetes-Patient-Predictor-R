@@ -1,0 +1,54 @@
+# Classification tree written by Kristian Obrusanszki
+# Define recipe, outcome is reliant on all the other variables
+rec <- recipe(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + Insulin + BMI + DiabetesPedigreeFunction + Age, 
+              data = completed_data)
+
+set.seed(14092022)
+
+# Classification decision tree
+tree <- decision_tree(
+  mode = "classification"
+) %>% set_engine("rpart")      #specify the engine if not set already
+
+# Create a workflow and add recipe and model to it
+tree_wflow <- workflow() |>
+  add_recipe(rec) |>
+  add_model(tree)
+
+# Fit the model to the data
+fit_tree <- fit(tree_wflow, data = completed_data)
+
+# Print the fit object to inspect it
+print(fit_tree)
+
+# Prepare data for prediction by pre-processing with the recipe
+pred <- rec |>
+  prep() |>
+  bake(new_data = NULL)
+
+# Use `augment()` to add predictions to the dataset
+data_aug <- augment(fit_tree, pred)
+
+# Preview the augmented data with predictions
+head(data_aug)
+
+# Calculate accuracy: specify Outcome as truth and .pred_class as estimate
+accuracy_result <- accuracy(data_aug, truth = Outcome, estimate = .pred_class)
+sensitivity_result <- sensitivity(data_aug, truth = Outcome, estimate = .pred_class)
+specificity_result <- specificity(data_aug, truth = Outcome, estimate = .pred_class)
+
+# Print accuracy
+print(accuracy_result)
+print(sensitivity_result)
+print(specificity_result)
+
+predictions <- predict(fit_tree, completed_data, type = "prob") %>%
+  bind_cols(completed_data) # Add the original data for reference
+
+# Calculate ROC curve
+roc_data <- roc_curve(predictions, truth = Outcome, .pred_1) # Assuming "1" is the positive class
+
+# Plot ROC curve
+autoplot(roc_data) +
+  ggtitle("ROC Curve for Classification Tree Model") +
+  theme_minimal()
