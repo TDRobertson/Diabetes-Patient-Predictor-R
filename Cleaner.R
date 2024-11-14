@@ -1,4 +1,4 @@
-#Author: Logan Bolton, Jun Han
+#Authors: Logan Bolton, Jun Han
 
 
 # Load the dataset
