@@ -1,3 +1,6 @@
+#Author: Logan Bolton, Jun Han
+
+
 # Load the dataset
 data <- read.csv(choose.files())
 
