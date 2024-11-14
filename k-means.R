@@ -1,4 +1,5 @@
 #Author: Logan Bolton
+#put at the end of cleaner function
 
 # Correctly construct selected_data
 selected_data <- as.matrix(cbind(data$Glucose, data$Insulin))
