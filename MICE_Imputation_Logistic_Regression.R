@@ -1,3 +1,4 @@
+# Author: Thomas D. Robertson II
 # Load necessary libraries
 if (!requireNamespace("tidyverse", quietly = TRUE)) install.packages("tidyverse")
 if (!requireNamespace("readxl", quietly = TRUE)) install.packages("readxl")
