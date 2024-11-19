@@ -1,5 +1,6 @@
 # Classification tree written by Kristian Obrusanszki
 # Define recipe, outcome is reliant on all the other variables
+completed_data$Outcome <- factor(completed_data$Outcome, levels = c(0, 1))
 rec <- recipe(Outcome ~ Pregnancies + Glucose + BloodPressure + SkinThickness + Insulin + BMI + DiabetesPedigreeFunction + Age, 
               data = completed_data)
 
@@ -33,17 +34,25 @@ data_aug <- augment(fit_tree, pred)
 head(data_aug)
 
 # Calculate accuracy: specify Outcome as truth and .pred_class as estimate
-accuracy_result <- accuracy(data_aug, truth = Outcome, estimate = .pred_class)
-sensitivity_result <- sensitivity(data_aug, truth = Outcome, estimate = .pred_class)
-specificity_result <- specificity(data_aug, truth = Outcome, estimate = .pred_class)
+accuracy_result <- data_aug %>%
+  yardstick::accuracy(truth = Outcome, estimate = .pred_class)
+sensitivity_result <- data_aug %>%
+  yardstick::sensitivity(truth = Outcome, estimate = .pred_class)
+specificity_result <- data_aug %>%
+  yardstick::specificity(truth = Outcome, estimate = .pred_class)
 
 # Print accuracy
 print(accuracy_result)
 print(sensitivity_result)
 print(specificity_result)
 
+# Add the original data for reference
 predictions <- predict(fit_tree, completed_data, type = "prob") %>%
-  bind_cols(completed_data) # Add the original data for reference
+  bind_cols(completed_data) 
+
+# Model made opposite predictions so we just FLIP EM
+predictions <- predictions %>%
+  mutate(.pred_1 = 1 - .pred_1)
 
 # Calculate ROC curve
 roc_data <- roc_curve(predictions, truth = Outcome, .pred_1) # Assuming "1" is the positive class
