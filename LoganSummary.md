@@ -138,5 +138,9 @@ cluster_means <- aggregate(. ~ cluster, data = clustered_data, FUN = mean)
 print(cluster_means)
 ```
 
-This is a k-means model that currently 
+This is a k-means clustering model that currently focuses on the relationship between insulin production and glucose levels. 
+While it **can** be used with cleaner.R, it is best used with Thomas's MICE_Cleaner.R, due to how cleaner.R used clustering to fill in insulin values.
+This creates a scatterplot and divides it into 3 groups to show that there are 3 main bodies when looking at insulin production.
+The groups are not completely separate, but there is a definite grouping based on the clustering centroids.
+
 
