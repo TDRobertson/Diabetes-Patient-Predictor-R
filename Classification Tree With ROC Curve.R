@@ -1,3 +1,20 @@
+# Load necessary libraries
+if (!requireNamespace("mice", quietly = TRUE)) install.packages("mice")
+if (!requireNamespace("caret", quietly = TRUE)) install.packages("caret")
+if (!requireNamespace("corrplot", quietly = TRUE)) install.packages("corrplot")
+if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
+if (!requireNamespace("tidyverse", quietly = TRUE)) install.packages("tidyverse")
+if (!requireNamespace("tidymodels", quietly = TRUE)) install.packages("tidymodels")
+if (!requireNamespace("rpart.plot", quietly = TRUE)) install.packages("rpart.plot")
+
+library(rpart.plot)
+library(tidyverse)
+library(tidymodels)
+library(mice)
+library(caret)
+library(corrplot)
+library(ggplot2)
+
 # Classification tree written by Kristian Obrusanszki
 # Define recipe, outcome is reliant on all the other variables
 completed_data$Outcome <- factor(completed_data$Outcome, levels = c(0, 1))
