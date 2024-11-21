@@ -33,43 +33,6 @@ summary(imputed_data)
 # Complete the dataset using the first imputed dataset
 completed_data <- complete(imputed_data, 1)
 
-# Validate imputations with visualizations
-# Before and after comparison for Glucose
-ggplot(data, aes(x = Glucose)) + 
-  geom_histogram(fill = 'blue', alpha = 0.5, bins = 20) + 
-  ggtitle("Glucose Distribution Before Imputation")
-
-ggplot(completed_data, aes(x = Glucose)) + 
-  geom_histogram(fill = 'green', alpha = 0.5, bins = 20) + 
-  ggtitle("Glucose Distribution After Imputation")
-
-# Check correlation matrix to ensure realistic relationships
-corrplot(cor(completed_data, use = "complete.obs"), method = "circle")
-
-# Split data into training and test sets
-set.seed(123)
-trainIndex <- createDataPartition(completed_data$Outcome, p = 0.8, list = FALSE)
-trainData <- completed_data[trainIndex, ]
-testData <- completed_data[-trainIndex, ]
-
-# Fit a logistic regression model
-model <- glm(Outcome ~ ., data = trainData, family = "binomial")
-summary(model)
-
-# Predict on the test set
-predictions <- predict(model, testData, type = "response")
-testData$Predicted <- ifelse(predictions > 0.5, 1, 0)
-
-# Evaluate model accuracy
-confusionMatrix(as.factor(testData$Predicted), as.factor(testData$Outcome))
-
-# Save the cleaned dataset if needed
-write.csv(completed_data, "cleaned_diabetes.csv", row.names = FALSE)
-
-completed_data |> ggplot(aes(x=Insulin,y=Glucose,color=factor(Outcome))) +
-  geom_point(size=1)
-
-
 
 ################################################################################### Classification tree written by Kristian Obrusanszki
 # Define recipe, outcome is reliant on all the other variables
