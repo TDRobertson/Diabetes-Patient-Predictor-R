@@ -7,6 +7,7 @@ if (!requireNamespace("corrplot", quietly = TRUE)) install.packages("corrplot")
 if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
 if (!requireNamespace("glmnet", quietly = TRUE)) install.packages("glmnet")
 if (!requireNamespace("themis", quietly = TRUE)) install.packages("themis")
+if (!requireNamespace("pROC", quietly = TRUE)) install.packages("pROC")
 
 library(tidyverse)
 library(mice)
@@ -15,6 +16,7 @@ library(corrplot)
 library(ggplot2)
 library(glmnet)
 library(themis)
+library(pROC)
 
 # Load the dataset
 data <- read.csv(choose.files(), stringsAsFactors = FALSE)
@@ -126,11 +128,23 @@ coef(lasso_model, s = best_lambda)
 # Predict using the lasso-regularized model
 x_test <- model.matrix(Outcome ~ ., testData)[, -1]
 predictions <- predict(lasso_model, newx = x_test, s = best_lambda, type = "response")
+
+# Store predicted probabilities and binary classifications
+testData$predicted_prob <- as.numeric(predictions)
 testData$Predicted <- ifelse(predictions > 0.5, 1, 0)
 
 # Evaluate model performance
 conf_matrix <- confusionMatrix(as.factor(testData$Predicted), as.factor(testData$Outcome), mode = "everything")
 print(conf_matrix)
+
+# Calculate ROC curve and AUC
+roc_curve <- roc(testData$Outcome, testData$predicted_prob)
+auc_value <- auc(roc_curve)
+print(paste("AUC:", auc_value))
+
+# Plot the ROC Curve
+plot(roc_curve, main = "ROC Curve for Lasso-regularized Logistic Regression", col = "blue", lwd = 2)
+
 
 # Save the cleaned and engineered dataset
 # write.csv(completed_data, "cleaned_diabetes.csv", row.names = FALSE)
