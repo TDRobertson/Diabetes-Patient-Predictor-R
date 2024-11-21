@@ -1,5 +1,6 @@
 # Author: Thomas D. Robertson II
 # Load necessary libraries
+if (!requireNamespace("tidyverse", quietly = TRUE)) install.packages("tidyverse")
 if (!requireNamespace("mice", quietly = TRUE)) install.packages("mice")
 if (!requireNamespace("caret", quietly = TRUE)) install.packages("caret")
 if (!requireNamespace("corrplot", quietly = TRUE)) install.packages("corrplot")
@@ -7,6 +8,7 @@ if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
 if (!requireNamespace("glmnet", quietly = TRUE)) install.packages("glmnet")
 if (!requireNamespace("themis", quietly = TRUE)) install.packages("themis")
 
+library(tidyverse)
 library(mice)
 library(caret)
 library(corrplot)
@@ -20,6 +22,56 @@ data <- read.csv(choose.files(), stringsAsFactors = FALSE)
 # Replace zeros with NA for specific columns
 columns_with_zeros <- c("Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI")
 data[columns_with_zeros] <- lapply(data[columns_with_zeros], function(x) ifelse(x == 0, NA, x))
+
+# Detect and count outliers using IQR method
+detect_outliers <- function(column) {
+  Q1 <- quantile(column, 0.25, na.rm = TRUE)
+  Q3 <- quantile(column, 0.75, na.rm = TRUE)
+  IQR_value <- Q3 - Q1
+  lower_bound <- Q1 - 1.5 * IQR_value
+  upper_bound <- Q3 + 1.5 * IQR_value
+  sum(column < lower_bound | column > upper_bound, na.rm = TRUE) # Count of outliers
+}
+
+# Count outliers for each numeric column
+outlier_counts <- sapply(data[columns_with_zeros], detect_outliers)
+outlier_counts_df <- data.frame(Column = names(outlier_counts), Outliers = outlier_counts)
+print(outlier_counts_df)
+
+# Visualize the outlier counts
+ggplot(outlier_counts_df, aes(x = Column, y = Outliers, fill = Column)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Number of Outliers Per Column",
+    x = "Column",
+    y = "Outliers"
+  ) +
+  theme_minimal()
+
+# Boxplots for visualization
+boxplot_data <- data %>%
+  select(all_of(columns_with_zeros)) %>%
+  pivot_longer(cols = everything(), names_to = "Column", values_to = "Value")
+
+ggplot(boxplot_data, aes(x = Column, y = Value, fill = Column)) +
+  geom_boxplot(outlier.color = "red") +
+  labs(
+    title = "Boxplots of Numeric Columns with Outliers Highlighted",
+    x = "Column",
+    y = "Value"
+  ) +
+  theme_minimal()
+
+# Histograms for visualization
+ggplot(boxplot_data, aes(x = Value, fill = Column)) +
+  geom_histogram(binwidth = 5, alpha = 0.7) +
+  facet_wrap(~Column, scales = "free") +
+  labs(
+    title = "Histograms of Numeric Columns",
+    x = "Value",
+    y = "Frequency"
+  ) +
+  theme_minimal()
 
 # Perform multiple imputation using MICE
 set.seed(123)
@@ -36,7 +88,7 @@ ggplot(completed_data, aes(x = Glucose)) +
   ggtitle("Glucose Distribution After Imputation")
 
 # Check correlation matrix to ensure realistic relationships
-corrplot(cor(completed_data, use = "complete.obs"), method = "circle")
+corrplot(cor(completed_data, use = "complete.obs"), method = "number")
 
 # Split data into training and test sets
 set.seed(123)
@@ -81,4 +133,4 @@ conf_matrix <- confusionMatrix(as.factor(testData$Predicted), as.factor(testData
 print(conf_matrix)
 
 # Save the cleaned and engineered dataset
-write.csv(completed_data, "cleaned_diabetes.csv", row.names = FALSE)
+# write.csv(completed_data, "cleaned_diabetes.csv", row.names = FALSE)
