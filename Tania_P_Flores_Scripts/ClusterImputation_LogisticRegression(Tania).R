@@ -94,3 +94,6 @@ print(paste("AUC:", auc_value))
 
 # Plot the ROC Curve
 plot(roc_curve, main = "ROC Curve")
+
+
+            
