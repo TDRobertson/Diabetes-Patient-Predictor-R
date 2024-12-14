@@ -30,9 +30,13 @@ The methods utilized in analysis include the following:
 
 ## Scripts
 The scripts used in the project can be found in the Analytics_scripts folder. The scripts include the following:
+
 Logistic Regression Analysis using cluster Imputation - ClusterImputation_LogisticRegression.R
+
 Logistic Regression Analysis with LASSO and SMOTE optimizations and MICE imputation replacement - MICE_Imputation_Logistic_Regression
+
 SVM Analysis using clustering imputation - SVM_analysis.R
+
 Decision Tree Classification - Classification Tree With ROC Curve.R
 
 and various kmeans clustering scripts to test predictor variables.
